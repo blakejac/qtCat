@@ -1,17 +1,39 @@
 r"""
 Code for working with Dyck vectors and q,t-Catalan numbers
 
-Summary goes here
+The q,t-Catalan numbers are symmetric polynomials in q and t which are an (area,dinv) refinement of the Catalan numbers.
+Also known as a q,t-analog, these polynomials are known to be symmetric in q and t from their definition. However, J. Haglund
+and M. Haiman proved that the q,t-Catalan numbers can be realized combinatorially via the area and dinv statistics on Dyck paths.
+This lead to a natural question: since the q,t-Catalan numbers are symmetric, what is a bijection on Dyck paths that interchnages
+the area and dinv statistics? In other words, is there a purely combinatorial proof of the q,t-symmetry of the q,t-Catalan numbers?
+There has been partial progress, but the results are limited.
 
-Copyright stuff is here because I hosted it on github as well, and they insist on something like that
+This code explores the q,t-Catalan numbers through ML methods. It will generate data as well as randomized bijections for ML techniques.
+Here are a few examples.
 
-EXAMPLES::
+EXAMPLES:
 
-<Lots and lots of examples>
+# This outputs all Dyck paths of length 8 = 2*4 along with their area and dinv statistics
+vecs = dyckVectors(4)
+for vec in vecs:
+    DyckWord(area_sequence=vec).pretty_print()
+    print("Area: ",dyckArea(vec))
+    print("Dinv: ",dyckDinv(vec))
+    print("Area Vector: ", vec)
+    print('-------------------------')
+
+# This code will output the matrix representaion of the q,t-Catalan number for n=6.
+A = qtCatMat(6)
+print(A)
+
+# This code outputs the number of possible (area,dinv) interchanging bijections for n = 1,...,10
+for i in range(1,11):
+    print(f"n = {i}: number of bijections = {numPossibleBijections(i)}")    
+
 
 AUTHORS:
 
-- Blake Jackson (2024-05-02): initial version
+- Blake Jackson (2025-04-09): initial version
 
 """
 
@@ -81,7 +103,7 @@ def dyckDefc(d):
     '''
     This code will calculate the deficit statistic of a Dyck vector.
     This is used when building the q,t-Catalan matrix for the
-    q,t-Catalan number.
+    q,t-Catalan number. It also appears in the results of Lee, Li, and Loehr.
     '''
     n = int(len(d))
     return (fact(n))/(2*fact(n-2)) - dyckArea(d) - dyckDinv(d)
@@ -147,11 +169,9 @@ def numPossibleBijections(n):
 # This function calculates the percent of Dyck paths which are not determined uniquely by their Area,Dinv vector
 def percentNondeterministic(n):
     '''
-    This code will generate a matrix which encodes the data
-    of the q,t-Catalan number and a similar one that replaces
-    the 1's in the matrix with 0's to see how many are not determined
-    by their (Area, Dinv) vector. The output is the percentage of
-    non-deterministic Dyck paths of length n.
+    This code will generate a matrix which encodes the data of the q,t-Catalan number and a similar one that replaces
+    the 1's in the matrix with 0's to see how many Dyck paths are not determined by their (Area, Dinv) vector. 
+    The output is the percentage of non-deterministic Dyck paths of length n.
     '''
     mat1 = qtCatMat(n)
     mat2 = mat1.copy() # Make a copy of the qt Catalan matrix
@@ -235,8 +255,8 @@ def randomBijection(n):
 def dyckPairing(n):
     '''
     This code will generate a list of paired elements for all of the Dyck vectors of a certain size 'n'.
-    Pairing occurs based on area-to-dinv matching. Pairings are randomized each run, set a seed for repeatibility.
-    Output is currently a list of pairs of Dyck paths given by their 0,1-sequence representation.
+    Pairing occurs based on area-to-dinv matching. There is no randomization, matching occurs based on first-come-first-serve basis.
+    Output is currently a list of pairs of Dyck paths given by their area-sequence representation.
     '''
     vecs = dyckVectors(n)
     elements = dyckListToDict(vecs)
